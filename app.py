@@ -34,7 +34,7 @@ def load_and_train_engine():
 
 model_engine, system_encoders = load_and_train_engine()
 
-# --- 2. COMMAND CENTER ---
+# --- 2. COMMAND CENTER (SIDEBAR) ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/3252/3252119.png", width=100)
     st.title("TARYAQ")
@@ -45,9 +45,24 @@ with st.sidebar:
     p_size = st.selectbox("Project Scale", ["Small", "Medium", "Large", "Mega", "Infrastructure"])
     p_act = st.selectbox("Operational Phase", ["Foundations", "Steel Structure", "Concrete Pouring", "HVAC Systems", "Finishing"])
     p_date = st.date_input("Execution Start Date", datetime.now())
-    p_days = st.number_input("Planned Duration (Days)", min_value=1, value=30)
+    p_days = st.number_input("Planned Duration (Days)", min_value=1, value=15)
     p_labor = st.slider("Workforce Efficiency Index", 0.1, 1.0, 0.70)
     
+    # --- SMART VALIDATION SYSTEM (The New Feature) ---
+    is_valid = True
+    validation_msg = ""
+
+    # Logic: Checking if duration matches project scale
+    if p_size == "Small" and p_days > 20:
+        is_valid = False
+        validation_msg = f"⚠️ Warning: {p_days} days is unusually long for a Small-scale project's {p_act} phase. Standard range: 3-12 days."
+    elif p_size in ["Mega", "Infrastructure"] and p_days < 7:
+        is_valid = False
+        validation_msg = f"⚠️ Warning: {p_days} days may be insufficient for a {p_size} project's {p_act} phase. Standard range: 15-60+ days."
+    
+    if not is_valid:
+        st.warning(validation_msg)
+
     st.divider()
     analyze_btn = st.button("🏗️ EXECUTE AI STRATEGIC SCAN", use_container_width=True)
 
@@ -55,9 +70,12 @@ with st.sidebar:
 st.title("🏗️ TARYAQ : NATIONAL STRATEGIC INTELLIGENCE")
 
 if analyze_btn and model_engine:
-    with st.status("📡 Connecting to Global Knowledge Base & Weather Satellites...", expanded=True) as status:
-        time.sleep(1)
-        st.write("🔍 Searching historical project benchmarks...")
+    # Stop execution if data is illogical (Optional: You can allow it but show warnings in report)
+    if not is_valid:
+        st.error("Engine Calibration Error: Input parameters violate standard engineering benchmarks. Please adjust duration.")
+        st.stop()
+
+    with st.status("📡 Connecting to Global Knowledge Base...", expanded=True) as status:
         time.sleep(1)
         st.write("🌡️ Analyzing atmospheric patterns for " + region + "...")
         status.update(label="Deep Scan Complete.", state="complete", expanded=False)
@@ -66,7 +84,6 @@ if analyze_btn and model_engine:
     temp_map = {"Riyadh Sector": 47, "Eastern Province": 45, "NEOM": 31, "Jeddah": 37, "Madinah": 44, "Asir": 19}
     current_temp = temp_map.get(region, 35)
     
-    # Advanced Weather Logic
     if current_temp >= 42: weather_status, icon = "Hot", "🌡️"
     elif current_temp <= 10: weather_status, icon = "Freezing", "❄️"
     elif region == "Asir": weather_status, icon = "Thunderstorms", "⛈️"
@@ -96,63 +113,37 @@ if analyze_btn and model_engine:
     st.divider()
     st.subheader("📝 COMPREHENSIVE STRATEGIC ENGINEERING DOSSIER")
 
-    # Check if project is on track (Low risk)
-    if prediction < 1.5:
-        report_content = f"""
-        ### 1. BRIEF OVERVIEW
-        The TARYAQ AI core indicates that the **{p_act}** phase in **{region}** is currently positioned within the **Optimal Execution Window**. The predicted variance of **{prediction:.2f} days** suggests that the project is mathematically on track.
+    # Final Detailed Report (English)
+    report_content = f"""
+    ### 1. EXECUTIVE OVERVIEW
+    TARYAQ Strategic Scan identifies a forecasted slippage of **{prediction:.2f} days** for **{p_act}** in **{region}**. Based on a **{p_size}** scale, this variance requires parametric alignment.
 
-        ### 2. RISK ASSESSMENT (LOW RISK)
-        No significant schedule-slip stressors are detected. Your current workforce efficiency of **{p_labor*100}%** is sufficient to meet the **{p_days}-day** target.
+    ### 2. POTENTIAL RISKS
+    * **Temporal Slippage:** A **{prediction:.2f}-day** delay will compound during subsequent phases.
+    * **Efficiency Drain:** At **{p_labor}** efficiency, the project lacks a safety buffer for environmental shocks.
 
-        ### 3. SUPPLY CHAIN STATUS
-        Regional logistics are categorized as **STABLE**. Procurement of materials for a **{p_size}** scale project in **{region}** shows no immediate dwell-time escalations.
+    ### 3. SUPPLY CHAIN RESILIENCE
+    Logistics for **{p_size}** scale projects are currently **{"VOLATILE" if p_size == "Mega" else "STABLE"}**. Regional port dwell-times remain a key risk factor for specialized equipment.
 
-        ### 4. WEATHER IMPACT
-        The identified **{weather_status}** condition is well-managed within the current parameters. Atmospheric interference is negligible for the **{p_act}** phase.
+    ### 4. WEATHER DYNAMICS & IMPACT
+    The **{weather_status}** condition (Peak: **{current_temp}°C**) triggers mandatory safety protocols. Daylight operations are mathematically 30% less efficient than nocturnal cycles.
 
-        ### 5. ADVICE FOR PROJECT MANAGERS
-        * **Standard Baseline Maintenance:** Continue monitoring the critical path without aggressive intervention.
-        * **Resource Optimization:** Consider rewarding the high-performing workforce to maintain the **{p_labor}** efficiency index.
-        * **Predictive Buffering:** While current status is stable, ensure that material inventories are verified 48 hours before the next phase transition.
-        """
-    else:
-        # High Risk Report (Detailed 7-Points)
-        report_content = f"""
-        ### 1. EXECUTIVE OVERVIEW
-        TARYAQ Strategic Scan has identified a forecasted schedule slippage of **{prediction:.2f} days** for the **{p_act}** phase in **{region}**. This variance exceeds the standard tolerance margin for a **{p_size}** scale project, requiring immediate parametric re-alignment.
+    ### 5. OPTIMAL LABOR COORDINATION
+    * **Nocturnal Transition:** Shift 80% of outdoor tasks to the 10:00 PM - 05:00 AM window.
+    * **Task Leveling:** Execute internal tasks during peak **{weather_status}** hours.
 
-        ### 2. POTENTIAL RISKS & FRICTION POINTS
-        * **Temporal Slippage:** The interdependency of the **{p_act}** phase means a **{prediction:.2f}-day** delay will likely trigger a cascade effect on subsequent milestones.
-        * **Labor Burnout:** At a **{p_labor}** efficiency setting, workers are operating at a threshold that cannot absorb environmental shocks.
-        * **Material Stability:** Risk of chemical instability in the **{p_act}** phase due to the current **{weather_status}** status.
+    ### 6. ESTIMATED MITIGATION COSTS
+    * **Logistical Acceleration:** +4.5% of phase cost for local sourcing.
+    * **Safety Logistics:** $1,500 - $5,000 for site-cooling infrastructure.
+    * **Night Shift Premiums:** +12% labor cost allocation.
 
-        ### 3. SUPPLY CHAIN RESILIENCE
-        Current logistics for **{p_size}** projects in the **{region}** are under moderate pressure. Dwell times at major ports have increased by 12%. The reliance on international long-lead items for **{p_act}** is a primary driver of the forecasted delay.
-
-        ### 4. WEATHER DYNAMICS & SITE IMPACT
-        The **{weather_status}** condition with a thermal peak of **{current_temp}°C** creates a "Structural Barrier." 
-        * **Impact:** In **{weather_status}** weather, labor productivity drops by approximately 30% due to safety cooling requirements. 
-        * **Material Physics:** Evaporation rates are critical, necessitating expensive hydration or cooling additives.
-
-        ### 5. OPTIMAL LABOR COORDINATION (ENGINEERING PLAN)
-        To maximize the **{p_labor}** efficiency index, TARYAQ mandates:
-        * **Shift Staggering:** Transition 75% of high-intensity tasks to the "Cooling Window" (10:00 PM - 05:00 AM).
-        * **Task Sequencing:** Perform indoor or shaded fit-out tasks during peak **{weather_status}** hours to maintain a continuous throughput.
-
-        ### 6. ESTIMATED ADDITIONAL COSTS (MITIGATION BUDGET)
-        * **Logistical Acceleration:** Budget an additional **4.5%** of the phase cost for local sourcing and express logistics.
-        * **Thermal Safety Equipment:** Est. **$1,200 - $5,000** for high-grade cooling stations and hydration logistics to protect labor.
-        * **Nocturnal Premiums:** Budget for a **12% increase** in labor costs for night-shift premiums.
-
-        ### 7. STRATEGIC SOLUTIONS & MANDATES
-        * **Pivot to Local Sourcing:** Immediately bypass maritime dwell times by utilizing **MODON Industrial Clusters**.
-        * **Parametric Re-Baselining:** Add a buffer of **{round(prediction * 1.5, 1)} days** to the current milestone to ensure stakeholder transparency.
-        * **AI-Live Monitoring:** Refresh this diagnostic every 72 hours to adapt to shifting **{weather_status}** patterns.
-        """
+    ### 7. STRATEGIC SOLUTIONS
+    * **Local Sourcing:** Bypass port delays by utilizing local MODON clusters.
+    * **Dynamic Buffering:** Add a **{round(prediction * 1.3, 1)} day** safety margin to the next milestone.
+    """
 
     st.markdown(report_content)
-    st.download_button("📥 DOWNLOAD STRATEGIC REPORT", report_content, file_name=f"TARYAQ_Report_{region}.txt")
+    st.download_button("📥 DOWNLOAD REPORT", report_content, file_name=f"TARYAQ_Report.txt")
 
 else:
-    st.info("👈 Please execute the AI Strategic Scan from the command center.")
+    st.info("👈 Please enter project parameters and execute the scan.")
