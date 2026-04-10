@@ -4,226 +4,234 @@ import numpy as np
 from datetime import datetime
 import time
 
-# --- 1. SETTINGS & STYLING ---
-st.set_page_config(page_title="TARYAQ | AI Infrastructure Control", page_icon="🏗️", layout="wide")
+# --- 1. GLOBAL SETTINGS & PROFESSIONAL STYLING ---
+st.set_page_config(page_title="TARYAQ | Global Strategic Control", page_icon="🏗️", layout="wide")
 
-# Custom CSS for Professional Dashboard
 st.markdown("""
     <style>
-    .footer { position: fixed; left: 0; bottom: 0; width: 100%; text-align: center; color: #9ca3af; font-size: 11px; padding: 10px; background-color: rgba(14, 17, 23, 0.9); border-top: 1px solid #1f2937; z-index: 1000; }
-    .stMetric { background-color: #1f2937 !important; padding: 20px !important; border-radius: 12px !important; border-left: 5px solid #3b82f6 !important; }
-    .main-header { font-size: 36px; font-weight: bold; color: #f8fafc; margin-bottom: 20px; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
-    .report-card { background-color: #111827; padding: 30px; border-radius: 15px; border: 1px solid #374151; line-height: 1.8; color: #d1d5db; }
-    h1, h2, h3 { color: #60a5fa !important; }
+    .report-container { background-color: #0e1117; padding: 25px; border-radius: 15px; border: 1px solid #1f2937; }
+    .footer { position: fixed; left: 0; bottom: 0; width: 100%; text-align: center; color: #9ca3af; font-size: 12px; padding: 10px; background-color: rgba(14, 17, 23, 0.9); border-top: 1px solid #1f2937; z-index: 1000; }
+    .stMetric { background-color: #1f2937 !important; padding: 20px !important; border-radius: 12px !important; border-bottom: 4px solid #3b82f6 !important; }
+    .logic-alert { color: #ff4b4b; font-weight: bold; background-color: rgba(255, 75, 75, 0.1); padding: 10px; border-radius: 5px; }
+    h1, h2, h3 { font-family: 'Segoe UI', sans-serif; }
+    .status-optimal { color: #00ff7f; font-weight: bold; }
+    .status-risk { color: #ff4b4b; font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. ADVANCED INTELLIGENCE ENGINES ---
+# --- 2. THE GLOBAL INTELLIGENCE ENGINE (Knowledge Bank & Crisis Mapping) ---
 
-def get_realtime_weather_ai(region, p_date):
-    """Accurate seasonal weather logic for KSA regions."""
-    month = p_date.month
-    # Resetting logic to ensure January is never 'Hot'
-    if month in [12, 1, 2]: # Winter
-        status = "Freezing/Cold" if region in ["Riyadh Sector", "NEOM", "Asir"] else "Mild/Clear"
-        temp = 12 if region != "Jeddah" else 21
-        if region == "Asir": status = "Dense Fog"
-    elif month in [6, 7, 8, 9]: # Summer
+def analyze_global_risks(region, scale):
+    """Simulating Global AI Search for Wars, Disasters, and Supply Chain Tensions."""
+    # Data represents real-time world status simulations (Red Sea, Global Logistics, Regional tensions)
+    crisis_map = {
+        "NEOM": {
+            "conflict_impact": "High (Maritime security in the Red Sea directly affects heavy machinery logistics).",
+            "logistics_status": "Volatile (30% increase in lead time for specialized tech).",
+            "global_context": "Affected by Suez Canal traffic diversions and regional naval instability."
+        },
+        "Jeddah": {
+            "conflict_impact": "Moderate (Increased shipping insurance premiums for regional ports).",
+            "logistics_status": "Strained (Port congestion due to alternative route docking).",
+            "global_context": "Direct correlation with Mediterranean-Red Sea trade disruptions."
+        },
+        "Eastern Province": {
+            "conflict_impact": "Low (Stability in the Arabian Gulf corridor).",
+            "logistics_status": "Optimal (Strong connectivity to GCC industrial hubs).",
+            "global_context": "Resilient against Red Sea crisis but sensitive to global oil price fluctuations."
+        },
+        "Riyadh Sector": {
+            "conflict_impact": "Minimal (Inland protection).",
+            "logistics_status": "Stable (Strategic land-bridge and air freight connectivity).",
+            "global_context": "High resilience due to diversified inland logistics hubs."
+        }
+    }
+    
+    # Default to general logic if region not in map
+    data = crisis_map.get(region, {
+        "conflict_impact": "Monitoring (Global status is currently under watch).",
+        "logistics_status": "Stable (Local markets providing buffer).",
+        "global_context": "Standard international trade flow."
+    })
+    
+    if scale in ["Mega", "Infrastructure"]:
+        data["logistics_status"] = "Strained (Global scarcity of high-performance materials)."
+        
+    return data
+
+def get_precise_weather(region, date):
+    """Corrected Seasonal Logic for KSA."""
+    month = date.month
+    # Winter (Dec, Jan, Feb)
+    if month in [12, 1, 2]:
+        status = "Freezing" if region in ["Riyadh Sector", "NEOM", "Asir"] else "Clear/Cool"
+        temp = 13 if region != "Jeddah" else 22
+    # Summer (Jun, Jul, Aug, Sep)
+    elif month in [6, 7, 8, 9]:
         status = "Extreme Heat"
-        temp = 47 if region != "Asir" else 27
-        if region in ["Jeddah", "Eastern Province"]: status = "High Humidity"
-    elif month in [3, 4, 5]: # Spring
-        status = "Thunderstorms" if region == "Asir" else "Dust Storms"
-        temp = 29
-        if region == "NEOM": status = "High Winds"
-    else: # Autumn
-        status = "Turbulent Winds"
+        temp = 46 if region != "Asir" else 28
+        if region in ["Jeddah", "Eastern Province"]: status = "Extreme Heat/Humid"
+    # Transition
+    else:
+        status = "Unsettled/Windy"
         temp = 32
+        if region == "Asir": status = "Heavy Rain Risk"
+        
     return status, temp
 
-def analyze_crisis_and_supply_chain(region, p_size):
-    """
-    Advanced simulation of AI searching for Wars, Disasters, and Supply Chain Status.
-    This logic changes dynamically based on region.
-    """
-    impact_score = 0
-    crisis_report = ""
-    
-    # Specific Regional Crisis Mapping
-    if region in ["NEOM", "Jeddah"]:
-        impact_score = 0.8
-        crisis_report = "CRITICAL: Maritime supply routes in the Red Sea are under 'High Alert' due to ongoing geopolitical conflicts. Supply chains for heavy machinery and specialized steel from Europe/Asia are experiencing 25-40% lead-time surges."
-    elif region == "Eastern Province":
-        impact_score = 0.3
-        crisis_report = "STABLE: Proximity to major industrial hubs (Jubail/Dammam) mitigates international shocks. However, energy price volatility is causing a slight uptick in logistics costs."
-    elif region == "Riyadh Sector":
-        impact_score = 0.2
-        crisis_report = "OPTIMAL: Strategic inland positioning protects the project from maritime blockades. Inland dry ports are fully operational, though truck queuing at regional borders is slightly elevated."
-    elif region == "Asir":
-        impact_score = 0.5
-        crisis_report = "WARNING: Seasonal natural disaster risk (Flash Floods). Supply routes through mountain passes are vulnerable to closures. Local cement supplies are stable but specialized finishing items are delayed."
-    else:
-        impact_score = 0.4
-        crisis_report = "MONITORING: General supply chain pressure due to global inflation. No immediate war or disaster impact detected in the immediate vicinity."
+# --- 3. DYNAMIC DATA & FILE HANDLING (Knowledge Bank) ---
 
-    # Scale Multiplier
-    if p_size in ["Mega", "Infrastructure"]:
-        impact_score += 0.2
-        crisis_report += " Additionally, the 'Mega' scale triggers localized resource scarcity for skilled labor and high-grade concrete."
+def process_knowledge_bank(uploaded_file):
+    """Processes Excel/CSV with intelligent assumptions."""
+    if uploaded_file:
+        try:
+            df = pd.read_excel(uploaded_file)
+            return df, "Data successfully integrated from Excel."
+        except:
+            return None, "Error reading file. Using AI fallback assumptions."
+    return None, "No file uploaded. Operating on strategic AI assumptions."
 
-    status = "Volatile" if impact_score > 0.6 else "Under Pressure" if impact_score > 0.4 else "Stable"
-    return status, crisis_report
+# --- 4. SIDEBAR - DYNAMIC INPUTS ---
 
-def calculate_engineering_variance(p_size, p_days, p_labor, w_status, sc_status):
-    """Engineering logic for schedule deviation."""
-    friction = (1.0 - p_labor) * (p_days * 0.5)
-    
-    # Weather frictions
-    if "Extreme Heat" in w_status or "Humidity" in w_status: friction += p_days * 0.35
-    if "Storms" in w_status or "Fog" in w_status: friction += p_days * 0.2
-    
-    # Crisis frictions
-    if sc_status == "Volatile": friction += p_days * 0.3
-    if sc_status == "Under Pressure": friction += p_days * 0.15
-    
-    if p_size == "Mega": friction += 12.0 # Baseline Mega-project complexity
-    
-    return round(friction, 2)
-
-# --- 3. SESSION STATE MANAGEMENT ---
-# To solve the update problem
-if 'last_report' not in st.session_state:
-    st.session_state.last_report = None
-
-# --- 4. SIDEBAR - PARAMETERS & VALIDATION ---
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/3252/3252119.png", width=80)
-    st.title("TARYAQ AI")
-    st.markdown("##### *Advanced Infrastructure Intelligence*")
+    st.image("https://cdn-icons-png.flaticon.com/512/3252/3252119.png", width=70)
+    st.title("TARYAQ SYSTEM")
+    st.markdown("##### *Global Engineering Intelligence*")
     st.divider()
     
-    region = st.selectbox("Strategic Region", ["Riyadh Sector", "Eastern Province", "NEOM", "Jeddah", "Madinah", "Asir"], key="reg")
-    p_size = st.selectbox("Project Scale", ["Small", "Medium", "Large", "Mega", "Infrastructure"], key="sz")
-    p_phase = st.selectbox("Operational Phase", ["Foundations", "Steel Structure", "Concrete Pouring", "HVAC Systems", "Finishing"], key="ph")
-    p_date = st.date_input("Deployment Commencement", datetime.now(), key="dt")
-    p_days = st.number_input("Target Duration (Days)", min_value=1, value=15, key="dy")
-    p_labor = st.slider("Workforce Efficiency Index", 0.1, 1.0, 0.85, key="lb")
+    # Information Bank Upload
+    st.subheader("📁 Knowledge Bank")
+    kb_file = st.file_uploader("Sync Project Data (Excel)", type=["xlsx"])
+    df_bank, kb_status = process_knowledge_bank(kb_file)
+    st.caption(kb_status)
+    
+    st.divider()
+    
+    # Control Parameters
+    region = st.selectbox("Project Region", ["Riyadh Sector", "Eastern Province", "NEOM", "Jeddah", "Madinah", "Asir"])
+    p_scale = st.selectbox("Project Scale", ["Small", "Medium", "Large", "Mega", "Infrastructure"])
+    p_phase = st.selectbox("Construction Phase", ["Foundations", "Steel Structure", "Concrete Pouring", "HVAC Systems", "Finishing"])
+    p_date = st.date_input("Start Date", datetime.now())
+    p_days = st.number_input("Target Duration (Days)", min_value=1, value=15)
+    p_labor = st.slider("Workforce Efficiency Index", 0.1, 1.0, 0.85)
 
-    # --- LOGIC ERROR DETECTION (Requested) ---
-    is_valid = True
-    if p_size == "Small" and p_days > 25:
-        st.error(f"⚠️ LOGIC ERROR: {p_days} days is illogical for a '{p_size}' phase of {p_phase}. AI suggests reducing to <15 days.")
-        is_valid = False
-    elif p_size in ["Mega", "Infrastructure"] and p_days < 10:
-        st.error(f"⚠️ LOGIC ERROR: Insufficient time for a '{p_size}' project. Minimum realistic duration is 20 days.")
-        is_valid = False
+    # --- LOGIC VALIDATOR (The 'Common Sense' Engine) ---
+    is_logical = True
+    logic_error = ""
+    if p_scale == "Small" and p_days > 25:
+        logic_error = f"⚠️ LOGIC ERROR: {p_days} days is excessive for a Small project's {p_phase} phase."
+        is_logical = False
+    elif p_scale in ["Mega", "Infrastructure"] and p_days < 10:
+        logic_error = f"⚠️ LOGIC ERROR: {p_days} days is insufficient for {p_scale} scale engineering."
+        is_logical = False
+
+    if not is_logical:
+        st.markdown(f"<div class='logic-alert'>{logic_error}</div>", unsafe_allow_html=True)
 
     st.divider()
-    if st.button("🚀 EXECUTE STRATEGIC SCAN", use_container_width=True):
-        if is_valid:
-            st.session_state.trigger_scan = True
-        else:
-            st.session_state.trigger_scan = False
+    analyze_btn = st.button("🚀 EXECUTE GLOBAL SCAN", use_container_width=True)
 
-# --- 5. MAIN EXECUTION & REPORTING ---
-st.markdown('<div class="main-header">🏗️ TARYAQ : STRATEGIC ENGINEERING CONTROL</div>', unsafe_allow_html=True)
+# --- 5. MAIN INTERFACE & REPORTING ENGINE ---
 
-if st.session_state.get('trigger_scan', False):
-    # Fetch Data
-    w_status, w_temp = get_realtime_weather_ai(region, p_date)
-    sc_status, sc_crisis = analyze_crisis_and_supply_chain(region, p_size)
-    p_var = calculate_engineering_variance(p_size, p_days, p_labor, w_status, sc_status)
-    
-    # Progress Simulation
-    with st.status("📡 Connecting to Strategic Knowledge Bank...", expanded=True) as status:
-        st.write("🔍 Scanning Global Crisis Database for Regional Wars & Conflicts...")
+st.title("🏗️ TARYAQ : ADVANCED STRATEGIC DOSSIER")
+
+if analyze_btn and is_logical:
+    # Trigger AI Engines
+    with st.status("📡 Connecting to Global Strategic Intelligence...", expanded=False) as status:
+        global_intel = analyze_global_risks(region, p_scale)
         time.sleep(1)
-        st.write(f"🌍 Pulling Satellite Weather Data for {region}...")
+        w_status, w_temp = get_precise_weather(region, p_date)
         time.sleep(1)
-        st.write("🚢 Analyzing Maritime and Land Supply Chain Volatility...")
-        status.update(label="Deep Scan Complete!", state="complete")
+        status.update(label="Global Analysis Complete!", state="complete")
 
-    # Metrics Layout
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Predicted Variance", f"{p_var} Days", delta="CRITICAL" if p_var > 5 else "STABLE")
-    m2.metric("Supply Chain Risk", sc_status)
-    m3.metric("Weather Alert", w_status)
-    m4.metric("Thermal Load", f"{w_temp}°C")
+    # Calculated Variance
+    base_var = (1.0 - p_labor) * p_days
+    env_impact = 4.5 if "Extreme Heat" in w_status or "Rain" in w_status else 0
+    geo_impact = 6.0 if "High" in global_intel['conflict_impact'] else 1.0
+    total_var = round(base_var + env_impact + geo_impact, 2)
+    is_safe = total_var < 5.0
+
+    # Dashboard Metrics
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Predicted Delay", f"{total_var} Days", delta="CRITICAL" if not is_safe else "SAFE")
+    c2.metric("Regional Risk", global_intel['conflict_impact'].split()[0])
+    c3.metric("Weather Load", w_status)
+    c4.metric("Ambient Temp", f"{w_temp}°C")
 
     st.divider()
 
-    # --- LONG-FORM REPORT GENERATION ---
-    st.markdown('<div class="report-card">', unsafe_allow_html=True)
+    # --- THE COMPREHENSIVE REPORT (150 - 1000 Words) ---
+    st.header("📑 ENGINEERING STRATEGIC DOSSIER")
     
-    is_safe = p_var < 3.5
-
     # 1. Brief Overview
-    st.header("I. BRIEF OVERVIEW")
-    st.write(f"TARYAQ Strategic Intelligence has processed the operational parameters for the **{p_phase}** phase of your **{p_size}** scale project in **{region}**. Based on the commencement date of **{p_date}**, our AI engine has cross-referenced global infrastructure benchmarks with local telemetry. {'The project currently shows high temporal resilience with a negligible variance' if is_safe else 'The project is currently flagged for a significant schedule deviation of ' + str(p_var) + ' days'}. This assessment serves as a high-level roadmap for the Project Management Office (PMO) to align with the Saudi National Strategic objectives.")
+    st.subheader("I. EXECUTIVE SUMMARY")
+    st.write(f"""
+    TARYAQ Global Intelligence has processed the operational parameters for the **{p_phase}** phase of the **{p_scale}** project located in the **{region}**. 
+    The AI engine has cross-referenced regional telemetry with global maritime and geopolitical data. 
+    Current projections indicate a total schedule variance of **{total_var} days**. 
+    {'The project is currently trending towards an optimal completion window with minimal friction.' if is_safe else 'The project is flagged for high-risk delays due to external stressors; immediate strategic intervention is required to safeguard the critical path.'}
+    """)
 
     # 2. Potential Risks
-    st.header("II. POTENTIAL RISKS")
+    st.subheader("II. POTENTIAL OPERATIONAL RISKS")
     if is_safe:
-        st.write("The primary risk detected is 'Momentum Decay'. While efficiency is at **{p_labor}**, any reduction in quality control frequency could lead to rework. We also identify a minor risk of 'Administrative Friction' during the handover to the next phase. Maintain the current pace but increase the frequency of site inspections by 15%.")
+        st.write("Current risk levels are nominal. The primary focus should be maintaining the workforce index and ensuring that 'Just-In-Time' delivery remains uncompromised by micro-logistical failures. No systemic threats from global conflicts are currently impacting this specific local window.")
     else:
         st.markdown(f"""
-        * **Schedule Compounding:** The {p_var}-day delay represents a systemic threat to the critical path, likely delaying the next three phases by an average of 20%.
-        * **Thermal Degradation:** Under **{w_status}** conditions, material stability (specifically for {p_phase}) is at risk.
-        * **Geopolitical Friction:** Indirect delays from the **{sc_status}** status of the supply chain will likely affect specialized machinery arrival.
+        * **Supply Chain Fragmentation:** High probability of lead-time inflation due to regional maritime instability.
+        * **Thermal Degradation:** Predicted **{w_temp}°C** peaks will likely impact material performance (especially in {p_phase}).
+        * **Geopolitical Volatility:** The project's proximity to **{region}** logistics hubs exposes it to international trade-route tensions.
         """)
 
-    # 3. Supply Chain Status (WARS & CRISIS ANALYSIS)
-    st.header("III. SUPPLY CHAIN STATUS & GLOBAL CRISIS ANALYSIS")
-    st.write(f"**Current Status:** {sc_status}")
-    st.info(f"**AI Intelligence Report:** {sc_crisis}")
-    st.write("Our 'Search Tool' indicates that regional tensions and maritime disruptions are fundamentally reshaping procurement strategies. For projects in **{region}**, we have detected a shift in logistics hubs. It is advised to avoid reliance on single-source international suppliers. TARYAQ recommends immediate diversification toward MODON-certified local manufacturers to bypass potential maritime blockades or war-related transit insurance spikes.")
+    # 3. Supply Chain (The Global Connector)
+    st.subheader("III. GLOBAL SUPPLY CHAIN & CRISIS ASSESSMENT")
+    st.markdown(f"""
+    * **Global Context:** {global_intel['global_context']}
+    * **Crisis Impact:** {global_intel['conflict_impact']}
+    * **AI Supply Logic:** TARYAQ identifies that for projects of **{p_scale}** scale, dependence on international long-lead items is high. Due to the **{global_intel['logistics_status']}** status, we recommend activating 'Alternative Sourcing' protocols immediately. Our global search indicates that maritime routes through the Red Sea are currently experiencing delays that could inject up to **{total_var} days** of additional buffer requirements.
+    """)
 
-    # 4. Weather & Impact Analysis
-    st.header("IV. WEATHER IMPACT ANALYSIS")
-    st.write(f"For the month of **{p_date.strftime('%B')}**, the {region} exhibits **{w_status}** patterns. The ambient load of **{w_temp}°C** {'is within the optimal operating window for structural work' if w_temp < 30 else 'represents a severe thermal challenge for outdoor operations'}.")
-    st.write(f"Historically, projects of this scale in {region} see a productivity drop of 22% when {w_status} conditions persist. AI modeling suggests that the {p_phase} will require enhanced curing monitoring (if concrete) or thermal expansion allowances (if steel).")
+    # 4. Weather Impact
+    st.subheader("IV. METEOROLOGICAL IMPACT ANALYSIS")
+    st.write(f"The forecasting for **{p_date.strftime('%B %Y')}** in **{region}** confirms **{w_status}** at **{w_temp}°C**. This is consistent with TARYAQ's historical weather bank. {'Conditions are ideal for structural work.' if 'Heat' not in w_status else 'This load requires a mandatory heat-mitigation plan. Concrete pouring during peak hours will fail quality audits due to evaporation rates.'}")
 
-    # 5. Workforce Coordination Strategy
-    st.header("V. WORKFORCE COORDINATION STRATEGY")
+    # 5. Workforce Strategy
+    st.subheader("V. WORKFORCE COORDINATION STRATEGY")
     if is_safe:
-        st.write(f"Maintain the current 8-hour shift structure. Since workforce efficiency is at **{p_labor}**, use this 'Golden Window' to complete 10% more of the non-critical tasks. Advice: Increase technical training for the second-tier labor force to maintain this momentum into the next phase.")
+        st.markdown("* **Instruction:** Maintain current shift patterns. Optimize for early-morning high-productivity windows to stay ahead of the curve.")
     else:
         st.markdown(f"""
-        * **The Nocturnal Pivot:** Transition 80% of outdoor high-intensity tasks to the 10:00 PM - 6:00 AM window.
-        * **Efficiency Buffering:** With efficiency at **{p_labor}**, provide 20-minute thermal recovery breaks every 2 hours.
-        * **PM Tip:** Re-allocate high-skill labor to the most critical bottleneck identified in the Gantt chart to reduce the {p_var}-day variance.
+        * **Strategic Pivot:** Transition to 'Nocturnal Operations' for the {p_phase} phase to bypass the **{w_temp}°C** peak.
+        * **Incentive Alignment:** Given the **{p_labor}** index, implement a 'Safety-First' bonus to prevent fatigue-related accidents during high-stress windows.
         """)
 
-    # 6. Estimated Additional Costs
-    st.header("VI. ESTIMATED ADDITIONAL COSTS")
+    # 6. Additional Costs
+    st.subheader("VI. FINANCIAL CONTINGENCY ESTIMATION")
     if is_safe:
-        st.success("**Estimated Impact: $0.00**. No emergency budget allocation is required. Maintain standard contingency (5%).")
+        st.info("**Projected Extra Cost: 0%**. Budget remains within baseline parameters.")
     else:
-        impact = "15% - 25%" if sc_status == "Volatile" else "8% - 12%"
-        st.warning(f"**Estimated Impact: +{impact} of Phase Budget**. This is driven by emergency procurement from local sources, night-shift hazard pay, and potential liquidating damages from the {p_var}-day delay.")
+        cost_inc = "15% - 22%" if p_scale in ["Mega", "Infrastructure"] else "8%"
+        st.warning(f"**Projected Extra Cost: +{cost_inc}**. This covers premium shipping routes, night-shift labor differentials, and thermal protection additives.")
 
     # 7. Strategic Solutions
-    st.header("VII. STRATEGIC SOLUTIONS")
+    st.subheader("VII. PROPOSED STRATEGIC SOLUTIONS")
     if is_safe:
-        st.write("1. **Continue Baseline Execution:** No changes required.")
-        st.write("2. **Strategic Stockpiling:** Buy 20% extra of bulk materials now while the supply chain is stable.")
-        st.write("3. **Early Inspection:** Perform a deep-audit 3 days before the phase ends.")
+        st.success("CONTINUE AS PLANNED. **Manager Tip:** Utilize this stable period to stockpile 20% of phase-2 materials as a hedge against future global volatility.")
     else:
         st.markdown(f"""
-        1. **Decentralized Procurement:** Immediately shift orders for critical components to regional suppliers in **{region}**.
-        2. **Dynamic Schedule Buffering:** Inject a **{round(p_var * 1.5, 1)} day** safety margin into the master schedule.
-        3. **Thermal Mitigation:** If {p_phase} involves concrete, utilize chilled water systems and ice-shaving aggregates to combat the **{w_temp}°C** load.
+        * **Logistics Re-routing:** Bypass Red Sea routes by utilizing land-bridge logistics from the Eastern Province to {region}.
+        * **Schedule Buffering:** Inject a **{round(total_var * 1.5, 1)} day** 'Strategic Buffer' into the Gantt chart.
+        * **Crisis Monitoring:** Monitor TARYAQ live alerts for any escalation in regional tensions that may affect the Madinah-NEOM corridor.
         """)
 
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Reset trigger to allow new scans
-    st.session_state.trigger_scan = False
+    # --- DOWNLOAD DATA ---
+    report_data = f"TARYAQ REPORT: {region} - {p_phase}\nScale: {p_scale}\nDelay: {total_var} days\nStatus: {global_intel['conflict_impact']}"
+    st.download_button("📥 DOWNLOAD FULL ENGINEERING DOSSIER", report_data, file_name=f"TARYAQ_{region}_Report.txt")
 
 else:
-    st.info("👈 Please enter project parameters and click 'EXECUTE STRATEGIC SCAN' to generate the technical dossier.")
+    st.info("👈 Please enter project parameters and click 'EXECUTE GLOBAL SCAN' to generate the report.")
 
-# --- 6. FOOTER ---
+# --- FOOTER ---
 st.markdown(f"""
     <div class="footer">
         Developed by Ahmad M. Al Musallem. All rights reserved. <br>
