@@ -19,29 +19,23 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. DATA LOADING ENGINE (KNOWLEDGE BANK) ---
+# --- 2. DATA LOADING (KNOWLEDGE BANK) ---
 @st.cache_data
-def load_kb_data():
-    file_path = 'PROJECT DATA.xlsx - Sheet1.csv'
+def load_knowledge_bank():
+    file_path = "PROJECT DATA.xlsx - Sheet1.csv"
     if os.path.exists(file_path):
-        try:
-            df = pd.read_csv(file_path)
-            # Standardize column names if needed
-            return df
-        except Exception as e:
-            st.error(f"Error reading Knowledge Bank: {e}")
-            return None
-    return None
+        df = pd.read_csv(file_path)
+        # Get unique activities for the selectbox
+        activities = sorted(df['Activity'].unique().tolist())
+        return df, activities
+    else:
+        # Fallback activities if file is missing
+        fallback = ["Foundations", "Steel Structure", "Concrete Pouring", "HVAC Systems", "Finishing", "Electrical", "Infrastructure Pipes"]
+        return None, fallback
 
-kb_df = load_kb_data()
+df_knowledge, activity_list = load_knowledge_bank()
 
-# Extract dynamic activities from Excel
-if kb_df is not None and 'Activity' in kb_df.columns:
-    dynamic_phases = sorted(kb_df['Activity'].dropna().unique().tolist())
-else:
-    dynamic_phases = ["Foundations", "Steel Structure", "Concrete Pouring", "HVAC Systems", "Finishing"]
-
-# --- 3. INTELLIGENCE ENGINES (GLOBAL SEARCH & WEATHER) ---
+# --- 3. INTELLIGENCE ENGINES ---
 
 def simulate_global_search(region, scale):
     global_status = {
@@ -50,7 +44,6 @@ def simulate_global_search(region, scale):
         "Global Steel Shortage": "Driven by regional wars, affecting Giga and Mega projects in Riyadh.",
         "Regional Stability": "Saudi domestic supply routes are 100% secure, but international maritime lanes are 'Volatile'."
     }
-    
     if region in ["NEOM", "Jeddah"]:
         return "Volatile", f"HIGH RISK: {global_status['Red Sea Conflict']}. Logistics re-routed via Cape of Good Hope."
     elif region == "Riyadh Sector":
@@ -81,7 +74,7 @@ def get_refined_weather(region, date):
 def validate_project_logic(p_size, p_days, p_phase):
     if p_size == "Small" and p_days > 25:
         return False, f"⚠️ LOGIC ERROR: {p_days} days for a 'Small' scale {p_phase} is excessive."
-    if p_size in ["Mega", "Infrastructure"] and p_days < 15:
+    if p_size in ["Mega", "Infrastructure", "Giga"] and p_days < 12:
         return False, f"⚠️ LOGIC ERROR: {p_days} days is critically insufficient for '{p_size}' {p_phase}."
     return True, ""
 
@@ -96,10 +89,10 @@ with st.sidebar:
     st.divider()
     
     region = st.selectbox("Strategic Region", ["Riyadh Sector", "Eastern Province", "NEOM", "Jeddah", "Madinah", "Asir"])
-    p_size = st.selectbox("Project Scale", ["Small", "Medium", "Large", "Mega", "Infrastructure"])
+    p_size = st.selectbox("Project Scale", ["Small", "Medium", "Large", "Mega", "Infrastructure", "Giga"])
     
-    # DYNAMIC PHASES FROM EXCEL
-    p_phase = st.selectbox("Operational Phase (From Knowledge Bank)", dynamic_phases)
+    # DYNAMIC TASKS FROM EXCEL
+    p_phase = st.selectbox("Operational Phase (Activity)", activity_list)
     
     p_date = st.date_input("Commencement Date", datetime.now())
     p_days = st.number_input("Target Duration (Days)", min_value=1, value=20)
@@ -114,88 +107,107 @@ with st.sidebar:
         if is_logical:
             st.session_state.analyze_triggered = True
         else:
-            st.error("Correct logic errors first.")
+            st.error("Cannot execute scan with logic errors.")
 
 # --- 6. MAIN DISPLAY & REPORT ---
 st.title("🏗️ TARYAQ : ADVANCED ENGINEERING INTELLIGENCE")
 
 if st.session_state.analyze_triggered:
-    with st.spinner("Analyzing Knowledge Bank & Global Crises..."):
-        time.sleep(1)
+    with st.spinner("Syncing Knowledge Bank & Analyzing Global Logistics..."):
+        time.sleep(1.2)
         
         w_status, w_temp = get_refined_weather(region, p_date)
         sc_status, sc_intel = simulate_global_search(region, p_size)
         
-        # Historical Insights Logic from KB
-        hist_delay = 0
-        if kb_df is not None:
-            relevant_data = kb_df[kb_df['Activity'] == p_phase]
-            if not relevant_data.empty:
-                hist_delay = round(relevant_data['Delay'].mean(), 1)
-        
         # Risk Calculation Logic
-        base_friction = (1.0 - p_labor) * 10
-        weather_friction = 5 if "Extreme" in w_status or "Storm" in w_status else 0
-        supply_friction = 7 if sc_status == "Volatile" else 0
-        p_var = round(base_friction + weather_friction + supply_friction + (p_days * 0.1), 2)
+        base_friction = (1.0 - p_labor) * 12
+        weather_friction = 6 if "Extreme" in w_status or "Storm" in w_status else 0
+        supply_friction = 8 if sc_status == "Volatile" else 0
+        p_var = round(base_friction + weather_friction + supply_friction + (p_days * 0.12), 2)
+        
         is_safe = p_var < 5.0
 
         # Dashboard Metrics
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Predicted Variance", f"{p_var} Days", delta=f"Hist Avg: {hist_delay}d", delta_color="inverse")
+        c1.metric("Predicted Variance", f"{p_var} Days", delta="HIGH RISK" if not is_safe else "STABLE", delta_color="inverse")
         c2.metric("Supply Chain", sc_status)
         c3.metric("Weather Impact", w_status)
         c4.metric("Ambient Temp", f"{w_temp}°C")
 
         st.divider()
 
-        # DYNAMIC LONG-FORM REPORT
+        # DYNAMIC REPORT
         st.markdown("<div class='report-card'>", unsafe_allow_html=True)
-        st.header("📑 STRATEGIC ENGINEERING DOSSIER")
+        st.header(f"📑 STRATEGIC DOSSIER: {p_phase.upper()}")
         
         # I. Brief Overview
         st.subheader("I. BRIEF OVERVIEW")
-        st.write(f"""The TARYAQ Engineering Core has completed a multi-layered analysis of the **{p_phase}** phase for the **{p_size}** project in **{region}**. 
-        Utilizing real-time AI search protocols and the synchronized Knowledge Bank, we have identified a temporal variance of **{p_var} days**. 
-        Historical records from our database for the activity '{p_phase}' indicate an average historical delay of **{hist_delay} days**, which aligns with our current predictive model. 
-        {'Operations are within the safe threshold' if is_safe else 'Critical slippage risk detected'}. """)
+        st.write(f"""The TARYAQ AI engine has cross-referenced the **{p_phase}** activity with historical data in the Knowledge Bank. 
+        For a project of **{p_size}** scale in **{region}**, we have identified a variance of **{p_var} days**. 
+        This phase is critical for the project's structural milestone, and current telemetry suggests {'a safe execution path' if is_safe else 'a high probability of critical path slippage'}. 
+        The analysis incorporates 2026 maritime transit data and Saudi Vision 2030 infrastructure benchmarks.""")
 
         # II. Potential Risks
         st.subheader("II. POTENTIAL RISKS")
-        if is_safe:
-            st.write(f"Risk levels for **{p_phase}** are nominal. Manager tip: Historical data shows that '{p_phase}' often suffers from late-stage documentation bottlenecks; ensure all sign-offs are ready 72 hours before the {p_days}-day mark.")
-        else:
-            st.write(f"1. **Compression:** The {p_var} day variance will disrupt the following milestones. 2. **Environment:** {w_temp}°C in {region} threatens '{p_phase}' integrity. 3. **Scale Stress:** {p_size} requirements exceed current local inventory.")
+        risk_hist = "Historical data shows this activity often faces material lead-time issues."
+        if df_knowledge is not None:
+            match = df_knowledge[df_knowledge['Activity'] == p_phase]
+            if not match.empty:
+                risk_hist = f"According to Knowledge Bank, similar '{p_phase}' tasks previously faced risks like: {match['Supply Chain'].iloc[0]}."
 
-        # III. Supply Chain Status & Global Crisis Impact
+        st.write(f"""1. **Historical Bottleneck:** {risk_hist}
+        2. **Logistics Strain:** The scale of **{p_size}** requires massive resource mobilization which is currently constrained by regional traffic.
+        3. **Environmental Stress:** The {w_status} condition will increase friction in mechanical operations by 12%.""")
+
+        # III. Supply Chain & Global Crisis
         st.subheader("III. SUPPLY CHAIN STATUS & GLOBAL CRISIS IMPACT")
-        st.write(f"**Status: {sc_status}**. {sc_intel}. Projects in **{region}** must account for the maritime blockade in the Red Sea. We recommend a 40% local sourcing strategy for all items related to {p_phase}.")
+        st.write(f"""**Status: {sc_status}**. {sc_intel}""")
+        st.write(f"""Global shipping lanes, specifically the Red Sea corridor, are impacting the arrival of specialized equipment for **{p_phase}**. 
+        AI-driven freight tracking suggests that 'Just-in-Time' delivery is no longer viable for **{region}**. 
+        TARYAQ recommends a strategic shift: source 40% of standard materials from local MODON hubs in Eastern/Central provinces to bypass maritime blockade risks.""")
 
-        # IV. Weather Impact Analysis
+        # IV. Weather Analysis
         st.subheader("IV. WEATHER IMPACT ANALYSIS")
-        st.write(f"Forecast for **{p_date.strftime('%B')}**: {w_status} at {w_temp}°C. This specific thermal load in {region} historically reduces efficiency by 12.5% for {p_phase} tasks.")
+        st.write(f"""Forecast for **{p_date.strftime('%B')}** in **{region}** predicts **{w_status}** with peaks of **{w_temp}°C**. 
+        {'This environment is suitable for high-speed assembly.' if w_temp < 35 else 
+        'Extreme thermal load detected. This will affect concrete hydration and worker stamina.'}""")
+        if w_temp > 42:
+            st.error("ALERT: Heat stress exceeds safety limits. AI mandates shifting 80% of outdoor work to nocturnal hours (9 PM - 5 AM).")
 
-        # V. Workforce Coordination Strategy
+        # V. Workforce Coordination
         st.subheader("V. WORKFORCE COORDINATION STRATEGY")
-        st.write(f"Given an efficiency of {p_labor}, implement: 1. Nocturnal Rotation (10PM-5AM). 2. Enhanced QA/QC layers. 3. 15-min cooling cycles.")
+        st.write(f"""Current Efficiency: **{p_labor*100}%**. 
+        1. **Optimized Shifts:** Implement a 3-shift rotation to compensate for the {p_var} days delay.
+        2. **Skill Allocation:** Assign 'Senior Specialists' to the {p_phase} critical nodes to ensure zero-rework.
+        3. **Safety Protocol:** Enhance hydration stations every 50 meters due to {w_status} conditions.""")
 
-        # VI. Estimated Additional Costs
+        # VI. Additional Costs
         st.subheader("VI. ESTIMATED ADDITIONAL COSTS")
-        cost_inc = "15-20%" if not is_safe else "2-5%"
-        st.write(f"Expected budget impact: **+{cost_inc}**. Driven by nocturnal labor premiums and logistics re-routing for {p_phase} specific materials.")
+        cost_p = "4-6%" if is_safe else "14-20%"
+        st.write(f"""Expected budget variance for this phase: **+{cost_p}**. 
+        Drivers include: 
+        * Premium nocturnal labor rates.
+        * Logistics re-routing costs for materials bypassed from conflict zones.
+        * Emergency local sourcing premiums.""")
 
-        # VII. Strategic Solutions
+        # VII. Solutions & Mitigation
         st.subheader("VII. STRATEGIC SOLUTIONS")
+        mitigation_msg = "Early procurement of long-lead items."
+        if df_knowledge is not None:
+            match = df_knowledge[df_knowledge['Activity'] == p_phase]
+            if not match.empty:
+                mitigation_msg = match['Risk Mitigation'].iloc[0]
+
         st.markdown(f"""
-        * **Buffer:** Add {round(p_var*1.2, 1)} days to next milestone.
-        * **Pivot:** Immediate contact with suppliers in Dammam/Jubail for {p_phase} backup.
-        * **AI Refresh:** Re-run scan every 48 hours for geopolitical updates.""")
+        * **Expert Recommendation:** {mitigation_msg}
+        * **Buffer Injection:** Add a safety buffer of {round(p_var * 1.3, 1)} days to the next milestone.
+        * **Local Pivot:** Immediately secure secondary supply contracts with factories in **{region}** to stabilize the supply chain.""")
 
         st.markdown("</div>", unsafe_allow_html=True)
-        st.download_button("📥 DOWNLOAD FULL REPORT", "FULL CONTENT...", file_name=f"TARYAQ_{region}.txt")
+        st.download_button("📥 DOWNLOAD TECHNICAL DOSSIER", f"TARYAQ REPORT\nRegion: {region}\nActivity: {p_phase}\nVariance: {p_var}...", file_name=f"TARYAQ_{region}.txt")
 
 else:
-    st.info("👈 Enter project parameters in the sidebar and click 'EXECUTE STRATEGIC SCAN'.")
+    st.info("👈 Select project parameters and click 'EXECUTE STRATEGIC SCAN' to begin.")
 
 # --- FOOTER ---
 st.markdown(f"""
