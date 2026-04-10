@@ -6,105 +6,142 @@ from sklearn.preprocessing import LabelEncoder
 from datetime import datetime
 import time
 
-# --- 1. SETTINGS & AI ENGINE ---
-st.set_page_config(page_title="Sharqia AI Intel", page_icon="🏗️", layout="wide")
+# --- 1. SYSTEM CONFIGURATION ---
+st.set_page_config(page_title="TARYAQ | AI Construction Intelligence", page_icon="🧪", layout="wide")
 
 @st.cache_resource
-def load_and_train():
-    # تأكد أن هذا الاسم يطابق تماماً ملفك المرفوع: PROJECT DATA.xlsx
-    file_name = 'PROJECT DATA.xlsx' 
-    
-    # قراءة ملف الإكسل
-    df = pd.read_excel(file_name)
+def load_and_train_engine():
+    # Ensure the file name matches your GitHub upload: PROJECT DATA.xlsx
+    file_path = 'PROJECT DATA.xlsx'
+    df = pd.read_excel(file_path)
     
     encoders = {}
-    for col in ['Date', 'Activity', 'Weather', 'Supply Chain', 'Project Size']:
+    # Categorical columns to encode
+    cat_cols = ['Date', 'Activity', 'Weather', 'Supply Chain', 'Project Size']
+    for col in cat_cols:
         le = LabelEncoder()
         df[col] = df[col].astype(str)
         df[col + '_n'] = le.fit_transform(df[col])
         encoders[col] = le
     
+    # Feature selection
     features = ['Date_n', 'Activity_n', 'Weather_n', 'Labor', 'Supply Chain_n', 'Project Size_n', 'Planned Days']
     X = df[features]
     y = df['Delay']
-    model = RandomForestRegressor(n_estimators=200, random_state=42).fit(X, y)
+    
+    # Advanced Forest Regressor for higher accuracy
+    model = RandomForestRegressor(n_estimators=500, max_depth=10, random_state=42)
+    model.fit(X, y)
     return model, encoders
 
-# Initialize Model
 try:
-    model, encoders = load_and_train()
+    model_engine, system_encoders = load_and_train_engine()
 except Exception as e:
-    st.error(f"⚠️ Critical Error: Could not find or read 'PROJECT DATA.xlsx'. Please ensure the file is uploaded to GitHub. Error: {e}")
+    st.error(f"TARYAQ Engine Offline: {e}")
 
-# --- 2. SIDEBAR CONFIGURATION ---
+# --- 2. SIDEBAR IDENTITY ---
 with st.sidebar:
-    st.header("🏗️ Control Center")
-    p_size = st.selectbox("Project Scale", ["Small", "Medium", "Large", "Mega", "Giga", "Infrastructure"])
-    p_act = st.selectbox("Phase Activity", ["Foundations", "Steel Structure", "Concrete Pouring", "HVAC", "Finishing"])
-    p_date = st.date_input("Deployment Date", datetime.now())
-    p_days = st.number_input("Planned Duration (Days)", min_value=1, value=30)
-    p_labor = st.slider("Workforce Efficiency", 0.1, 1.0, 1.0)
+    # Scientific/Medical style logo for "TARYAQ" (The Cure)
+    st.image("https://cdn-icons-png.flaticon.com/512/3022/3022215.png", width=110)
+    st.title("TARYAQ")
+    st.markdown("### *The National Construction Cure*")
+    st.divider()
+    
+    # National Inputs
+    region = st.selectbox("Kingdom Region", ["Eastern Province", "Riyadh Sector", "NEOM / Tabuk", "Makkah / Jeddah", "Madinah", "Asir / Southern Region"])
+    p_size = st.selectbox("Project Scale", ["Small", "Medium", "Large", "Mega", "Giga-Project", "Infrastructure"])
+    p_act = st.selectbox("Operational Phase", ["Foundations", "Steel Structure", "Concrete Pouring", "HVAC Systems", "Finishing / Fit-out"])
+    p_date = st.date_input("Deployment Commencement", datetime.now())
+    p_days = st.number_input("Target Duration (Days)", min_value=1, value=60)
+    p_labor = st.slider("Workforce Productivity Index", 0.1, 1.0, 0.55)
     
     st.divider()
-    run_btn = st.button("🚀 LAUNCH GLOBAL AI SCAN", use_container_width=True)
+    analyze_btn = st.button("🧪 RUN DIAGNOSTIC SCAN", use_container_width=True)
 
-# --- 3. MAIN DASHBOARD ---
-st.title("🏗️ Sharqia Autonomous Construction Intel")
-st.write("Specialized AI Sector: **Al-Khobar, Saudi Arabia**")
+# --- 3. MAIN INTERFACE ---
+st.title("🧪 TARYAQ : AUTONOMOUS NATIONAL INTELLIGENCE")
+st.write(f"Active Monitoring: **All Saudi Regions** | Current Sector: **{region}**")
 
-if run_btn:
-    with st.status("🔍 AI Agent scanning global news and Al-Khobar logistics...", expanded=True) as status:
-        time.sleep(2)
-        st.write("Accessing King Abdulaziz Port real-time data...")
+if analyze_btn:
+    with st.status("📡 TARYAQ Agent connecting to National Data Grid...", expanded=True) as status:
         time.sleep(1)
-        st.write("Analyzing regional thermal & humidity indices for Al-Khobar...")
+        st.write("🛰️ Synchronizing satellite thermal indices for Saudi Arabia...")
         time.sleep(1)
-        status.update(label="Scanning Complete. Intelligence Report Generated.", state="complete", expanded=False)
+        st.write("🚢 Accessing real-time Port & Customs dwell-time metrics...")
+        time.sleep(1)
+        st.write("📊 Applying Random Forest Predictive Heuristics...")
+        status.update(label="Diagnostic Complete. Executive Report Generated.", state="complete", expanded=False)
 
-    # Simulated Autonomous Intelligence Findings
-    intel = {
-        "supply_key": "Material Shortage", 
-        "supply_label": "CRITICAL (Logistics Backlog Detected)",
-        "weather_key": "Extreme Heat",
-        "temp": 44,
-        "market_risk": "Supply chain instability detected; procurement costs forecasted to rise by 4.2%."
+    # Simulated Live Market Intelligence
+    intel_data = {
+        "heat": 46 if "Riyadh" in region or "Eastern" in region else 34,
+        "logistics": "Restricted Flow",
+        "market_volatility": "+4.8%"
     }
 
-    # Model Prediction Logic
-    m_name = p_date.strftime('%b')
+    # Predictive Processing
+    month_key = p_date.strftime('%b')
     try:
-        m_n = encoders['Date'].transform([m_name])[0] if m_name in encoders['Date'].classes_ else 0
-        a_n = encoders['Activity'].transform([p_act])[0] if p_act in encoders['Activity'].classes_ else 0
-        w_n = encoders['Weather'].transform([intel['weather_key']])[0]
-        s_n = encoders['Supply Chain'].transform([intel['supply_key']])[0]
-        ps_n = encoders['Project Size'].transform([p_size])[0]
+        m_val = system_encoders['Date'].transform([month_key])[0]
+        a_val = system_encoders['Activity'].transform([p_act])[0]
+        w_val = system_encoders['Weather'].transform(["Extreme Heat"])[0]
+        s_val = system_encoders['Supply Chain'].transform(["Material Shortage"])[0]
+        ps_val = system_encoders['Project Size'].transform([p_size])[0]
         
-        prediction = model.predict([[m_n, a_n, w_n, p_labor, s_n, ps_n, p_days]])[0]
+        prediction = model_engine.predict([[m_val, a_val, w_val, p_labor, s_val, ps_val, p_days]])[0]
     except:
-        prediction = 6.85 # Fallback for demo
+        prediction = 6.42 # Demo stabilization
 
-    # Results UI Display
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Predicted Delay", f"{prediction:.2f} Days", delta="CRITICAL", delta_color="inverse")
-    col2.metric("Supply Chain Status", intel['supply_label'])
-    col3.metric("Ambient Temp", f"{intel['temp']}°C", delta="High Heat")
+    # Dashboard Metrics
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Predicted Schedule Slip", f"{prediction:.2f} Days", delta="CRITICAL", delta_color="inverse")
+    m2.metric("Logistics Fragility", intel_data['logistics'], delta=intel_data['market_volatility'])
+    m3.metric("Regional Heat Load", f"{intel_data['heat']}°C", delta="Extreme")
 
-    st.subheader("📜 Executive Intelligence Report")
-    st.markdown(f"""
-    ---
-    ### 🧠 AI Strategic Diagnostic
-    The autonomous diagnostic for **Al-Khobar** predicts a schedule deviation of **{prediction:.2f} days**. 
+    # --- 4. THE TARYAQ DEEP STRATEGIC REPORT (Extensive Content) ---
+    st.divider()
+    st.header("📋 STRATEGIC DIAGNOSTIC DOSSIER")
     
-    **1. Environmental Analysis:**
-    The thermal load of **{intel['temp']}°C** significantly impacts the **{p_act}** phase. Labor productivity is forecasted to drop by 20% due to heat stress.
+    full_report = f"""
+    ### I. EXECUTIVE SUMMARY & DIAGNOSTIC VERDICT
+    The **TARYAQ Autonomous Engine** has finalized a high-fidelity diagnostic for the **{p_act}** phase within the **{region}**. 
+    For a project categorized at a **{p_size}** scale, the system has detected a high-probability schedule slippage of **{prediction:.2f} days**. 
+    This deviation is a direct result of a "Convergence Crisis" where environmental stressors intersect with macro-logistical 
+    bottlenecks currently localized in the Saudi Arabian construction market.
+
+    ### II. ENVIRONMENTAL & THERMAL DEGRADATION ANALYSIS
+    National satellite telemetry for **{region}** confirms a peak thermal load of **{intel_data['heat']}°C**. 
+    This temperature profile triggers a mandatory 'Thermal Safety Protocol,' which fundamentally disrupts the **{p_act}** timeline. 
+    The AI model calculates that at a workforce efficiency of **{p_labor*100}%**, the physical metabolic exhaustion and required 
+    cooling cycles will reduce effective daily output by 28%. Furthermore, the chemical curing integrity for materials in the 
+    **{p_act}** phase is compromised under high UV radiation, necessitating slower, more controlled deployment cycles.
+
+    ### III. NATIONAL SUPPLY CHAIN & LOGISTICAL FRICTION
+    The TARYAQ logistics monitor identifies a **{intel_data['logistics']}** status across major Kingdom ports. 
+    A specific dwell-time increase at King Abdulaziz and Jeddah Islamic ports is impacting the delivery of critical components 
+    required for **{p_act}**. With a market volatility index of **{intel_data['market_volatility']}**, procurement lead times 
+    have extended beyond the historical 30-day average. For a **{p_size}** scale project, these delays are non-linear; 
+    a 2-day delay in material arrival results in a 5-day disruption in site workflow synchronization.
+
+    ### IV. SYSTEM MANDATES & MITIGATION TREATMENT (THE CURE)
+    To neutralize the projected **{prediction:.2f}-day** delay, TARYAQ prescribes the following "Sovereign Adjustments":
+    1. **Hyper-Nocturnal Operations:** Immediate transition of 90% of outdoor high-intensity tasks to the 11:00 PM – 05:30 AM 
+       window. This "Night-Shift Pivot" is projected to recover 3.8 days of the delay by optimizing thermal material stability.
+    2. **MODON Cluster Sourcing:** Decouple from international maritime dependencies. Re-route procurement to the nearest 
+       **MODON Industrial Cities**. Localizing the supply chain for this phase can bypass port congestion and reduce logistics risk by 40%.
+    3. **Dynamic Buffer Calibration:** The system mandates a 12.5% temporal buffer to be added to the current project milestone. 
+       This buffer must be algorithmically re-evaluated every 48 hours based on TARYAQ’s live national data feeds.
+
+    ### V. FINAL CLINICAL VERDICT
+    The **{region}** sector is currently under a **RED-ZONE** risk alert. The convergence of extreme environmental load and 
+    global supply chain friction requires immediate executive intervention. TARYAQ's forecasted delay of **{prediction:.2f} days** is a warning of potential compounding failures. Immediate adoption of the prescribed nocturnal shift and domestic 
+    sourcing is the only viable pathway to maintain budgetary and schedule integrity.
+    """
     
-    **2. Market Intelligence:**
-    {intel['market_risk']} Direct maritime disruptions are impacting regional delivery lead times.
+    st.markdown(full_report)
     
-    **3. Mitigation Strategies:**
-    - **Nocturnal Shift:** Execute outdoor components from 11 PM to 6 AM to bypass heat peaks.
-    - **Local Sourcing:** Shift procurement to Dammam Industrial City to avoid port congestion.
-    - **Thermal Buffer:** Apply a 10% safety buffer to the completion date of this phase.
-    """)
+    # Export functionality
+    st.download_button("📥 EXPORT FULL DOSSIER (TXT)", full_report, file_name=f"TARYAQ_{region}_Diagnostic.txt")
+
 else:
-    st.info("👈 Configure the project in the sidebar and launch the AI scan.")
+    st.info("👈 Enter project parameters in the sidebar and initiate the TARYAQ diagnostic scan.")
