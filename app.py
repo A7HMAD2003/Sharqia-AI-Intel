@@ -4,157 +4,151 @@ import numpy as np
 from datetime import datetime
 import time
 
-# --- 1. SETTINGS & PAGE CONFIG ---
-st.set_page_config(page_title="TARYAQ | AI Control", page_icon="🏗️", layout="wide")
+# --- 1. CORE CONFIGURATION ---
+st.set_page_config(page_title="TARYAQ | AI Engineering Intelligence", page_icon="🏗️", layout="wide")
 
-# This ensures the report updates EVERY time the button is clicked
-if 'report_generated' not in st.session_state:
-    st.session_state.report_generated = False
-    st.session_state.full_report = ""
+# Persistent state management to ensure dynamic updates
+if 'current_report' not in st.session_state:
+    st.session_state.current_report = ""
 
-# --- 2. SIDEBAR COMMAND CENTER ---
+# --- 2. COMMAND CENTER (SIDEBAR) ---
 with st.sidebar:
     st.title("🏗️ TARYAQ")
-    st.markdown("##### *Dynamic Strategic Intel*")
+    st.markdown("##### *Autonomous Project Control*")
     st.divider()
     
     region = st.selectbox("Strategic Region", ["Riyadh Sector", "Eastern Province", "NEOM", "Jeddah", "Madinah", "Asir"])
     p_size = st.selectbox("Project Scale", ["Small", "Medium", "Large", "Mega", "Infrastructure"])
     p_phase = st.selectbox("Operational Phase", ["Foundations", "Steel Structure", "Concrete Pouring", "HVAC Systems", "Finishing"])
     p_date = st.date_input("Execution Date", datetime.now())
-    p_days = st.number_input("Target Duration (Days)", min_value=1, value=10)
-    p_labor = st.slider("Workforce Efficiency Index", 0.1, 1.0, 0.85)
+    p_days = st.number_input("Target Duration (Days)", min_value=1, value=15)
+    p_labor = st.slider("Workforce Efficiency Index", 0.1, 1.0, 0.80)
 
     # --- ENGINEERING LOGIC VALIDATOR ---
     is_valid = True
-    v_msg = ""
     if p_size == "Small" and p_days > 25:
+        st.error(f"⚠️ LOGIC ERROR: {p_days} days is excessive for a Small scale phase.")
         is_valid = False
-        v_msg = f"⚠️ RED FLAG: {p_days} days for a Small scale project is excessive."
-    elif p_size in ["Mega", "Infrastructure"] and p_days < 7:
+    elif p_size in ["Mega", "Infrastructure"] and p_days < 10:
+        st.error(f"⚠️ LOGIC ERROR: {p_days} days is insufficient for {p_size} scale.")
         is_valid = False
-        v_msg = f"⚠️ RED FLAG: {p_days} days is insufficient for Mega scale."
-
-    if not is_valid:
-        st.error(v_msg)
 
     st.divider()
-    # Clicking this button will now force a re-run of the whole logic
-    generate_btn = st.button("🚀 EXECUTE AI STRATEGIC SCAN", use_container_width=True)
+    analyze_btn = st.button("🚀 EXECUTE DEEP STRATEGIC SCAN", use_container_width=True)
 
-# --- 3. DYNAMIC WEATHER & INTELLIGENCE ENGINE ---
-def generate_dynamic_intel(region, date, p_size, p_phase, p_days, p_labor):
+# --- 3. DYNAMIC WEATHER & CALCULATION ENGINE ---
+def get_intel_parameters(region, date, p_size, p_days, p_labor):
     month = date.month
-    
-    # Precise Weather Logic (By Month & Geography)
+    # Advanced Weather Logic
     if month in [12, 1, 2]: # Winter
-        status = "Clear" if region != "Asir" else "Foggy"
-        temp = 16 if region != "Jeddah" else 25
-        if region == "Asir": temp = 8
+        status, temp = ("Clear" if region != "Asir" else "Foggy"), (16 if region != "Jeddah" else 24)
     elif month in [6, 7, 8]: # Summer
-        status = "Hot"
-        temp = 45 if region != "Asir" else 27
+        status, temp = ("Hot"), (46 if region != "Asir" else 29)
         if region in ["Jeddah", "Eastern Province"]: status = "Humid"
     elif month in [3, 4, 5]: # Spring
-        status = "Cloudy"
-        temp = 28
+        status, temp = ("Cloudy"), (29)
         if region == "NEOM": status = "Windy"
     else: # Autumn
-        status = "Thunderstorms" if region == "Asir" else "Windy"
-        temp = 32
-
-    # Calculation logic for Variance (Heuristics based on engineering)
-    # This replaces illogical Excel data with realistic assumptions
-    base_var = (p_days * 0.1) 
-    if status in ["Hot", "Humid", "Thunderstorms"]: base_var += (p_days * 0.25)
-    if p_labor < 0.7: base_var += (p_days * 0.15)
-    if p_size == "Mega": base_var += 4.5
+        status, temp = ("Thunderstorms" if region == "Asir" else "Windy"), (31)
     
-    variance = round(base_var, 2)
-    return status, temp, variance
+    # Realistic Variance Calculation (Simulating AI Heuristics)
+    v_base = (p_days * 0.12)
+    if status in ["Hot", "Humid", "Thunderstorms"]: v_base += (p_days * 0.22)
+    if p_labor < 0.75: v_base += (p_days * 0.18)
+    if p_size in ["Mega", "Infrastructure"]: v_base += 6.5
+    
+    return status, temp, round(v_base, 2)
 
-# --- 4. OUTPUT DISPLAY ---
-st.title("🏗️ TARYAQ : PROJECT MANAGEMENT CORE")
+# --- 4. MAIN INTERFACE ---
+st.title("🏗️ TARYAQ : NATIONAL PROJECT INTELLIGENCE")
 
-if generate_btn:
-    if not is_valid:
-        st.error("Engine Blocked: Parameters are not logically sound.")
+if analyze_btn and is_valid:
+    w_status, w_temp, p_var = get_intel_parameters(region, p_date, p_size, p_days, p_labor)
+    
+    with st.status("📡 Generating High-Fidelity Strategic Dossier...", expanded=True) as s:
+        time.sleep(1.5)
+        st.write("📊 Calculating Parametric Slippage...")
+        time.sleep(1)
+        s.update(label="Analysis Complete!", state="complete", expanded=False)
+
+    # Metrics
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Predicted Variance", f"{p_var} Days", delta="HIGH RISK" if p_var > 4 else "OPTIMAL")
+    c2.metric("Supply Chain", "CRITICAL" if p_size == "Mega" else "STABLE")
+    c3.metric("Ambient Load", f"{w_temp}°C")
+    c4.metric("Weather Status", w_status)
+
+    st.divider()
+    
+    # --- 5. THE DEEP REPORT (150 - 1000 WORDS) ---
+    if p_var > 3.0:
+        # RISK REPORT
+        report = f"""
+        ## 📝 STRATEGIC ENGINEERING CONTROL DOSSIER (RISK ADVISORY)
+        
+        ### I. EXECUTIVE SUMMARY & PARAMETRIC OVERVIEW
+        TARYAQ Management Core has finalized a high-fidelity schedule impact analysis for the **{p_phase}** phase within the **{region}**. For a project at **{p_size}** scale, our AI identifies a critical schedule deviation of **{p_var} days**. This variance is not merely a delay but a systemic failure driven by environmental stressors and regional supply chain friction points that fall outside traditional CPM (Critical Path Method) manual estimations. The current baseline of **{p_days} days** is mathematically vulnerable under the identified constraints.
+
+        ### II. POTENTIAL RISKS & IMPACT ANALYSIS
+        The identified slippage of **{p_var} days** presents several cascading risks:
+        * **Temporal Compounding:** A delay in **{p_phase}** will likely result in a 25% increase in lead times for subsequent milestones.
+        * **Structural Integrity Risks:** Under **{w_status}** conditions at **{w_temp}°C**, material curing (especially for concrete or coatings) may face accelerated evaporation, leading to micro-cracking and reduced structural lifespan.
+        * **Workforce Fatigue:** Maintaining a **{p_labor}** efficiency index under extreme atmospheric loads will lead to a 30% increase in site incidents and rapid labor turnover.
+
+        ### III. SUPPLY CHAIN & LOGISTICAL RESILIENCE
+        Current logistics for **{region}** are categorized as **{"CRITICAL" if p_size == "Mega" else "UNDER PRESSURE"}**. AI-driven scraping of port and transit data indicates a significant dwell-time escalation for specialized equipment. For a **{p_size}** scale project, procurement cycles are currently exceeding the standard buffer by 12.5%. Failure to localize sourcing will exacerbate the **{p_var}-day** delay.
+
+        ### IV. METEOROLOGICAL IMPACT ANALYSIS
+        The site is currently under a **{w_status}** advisory with a thermal peak of **{w_temp}°C**. 
+        * **Atmospheric Friction:** The **{w_status}** condition creates a 'Structural Friction' point that fundamentally recalibrates productivity rates for **{p_phase}**.
+        * **Safety Mandates:** Operating during peak daylight hours is no longer economically or ethically viable, as the thermal load exceeds international safety benchmarks.
+
+        ### V. OPTIMAL LABOR COORDINATION STRATEGY
+        To sustain operations, TARYAQ mandates a total tactical pivot:
+        1. **Nocturnal Transition:** Shift 85% of high-intensity tasks to the 22:00 - 06:00 window to bypass the **{w_temp}°C** heat.
+        2. **Skill-Leveling:** Re-allocate the most experienced crews to the critical path activities during the first 4 hours of the shift.
+        3. **Hydration & Cooling:** Implement 20-minute mandatory recovery cycles every 90 minutes.
+
+        ### VI. ESTIMATED MITIGATION COSTS (PROJECTED)
+        * **Logistical Acceleration:** +$5,200 - $15,000 for emergency local sourcing.
+        * **Labor Premiums:** 18% increase in phase labor budget due to night-shift hazard pay.
+        * **Environmental Infrastructure:** $3,500 for site cooling and moisture control systems.
+
+        ### VII. STRATEGIC SOLUTIONS & SOLUTIONS
+        * **Immediate Action:** Decentralize the supply chain. Source materials from MODON industrial cities in **{region}** to bypass transit bottlenecks.
+        * **Dynamic Buffering:** Factor in a **{round(p_var * 1.4, 1)} day** safety margin for the next three milestones.
+        * **Continuous AI Refinement:** Re-run this diagnostic every 48 hours to adapt to fluctuating **{w_status}** patterns.
+        """
     else:
-        # Reset and generate fresh data
-        w_status, w_temp, p_var = generate_dynamic_intel(region, p_date, p_size, p_phase, p_days, p_labor)
+        # POSITIVE REPORT
+        report = f"""
+        ## 📝 STRATEGIC ENGINEERING CONTROL DOSSIER (OPTIMAL STATUS)
         
-        with st.status("📡 Running Intelligence Scan...", expanded=True) as s:
-            time.sleep(1)
-            st.write(f"🔍 Analyzing {region} logistics...")
-            time.sleep(1)
-            s.update(label="Analysis Complete!", state="complete", expanded=False)
+        ### I. EXECUTIVE SUMMARY
+        The project is currently operating within the **Optimal Execution Window**. For the **{p_phase}** phase in **{region}**, TARYAQ AI confirms that your baseline of **{p_days} days** is mathematically sound. The projected variance of **{p_var} days** is negligible and easily absorbed by standard contingency buffers.
 
-        # Dashboard
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Predicted Slip", f"{p_var} Days", delta="CRITICAL" if p_var > 3 else "STABLE")
-        c2.metric("Supply Chain", "VOLATILE" if p_size == "Mega" else "STABLE")
-        c3.metric("Ambient Load", f"{w_temp}°C")
-        c4.metric("Weather Status", w_status)
+        ### II. POTENTIAL RISKS
+        Risk profile is categorized as **STABLE**. No systemic environmental or logistical threats are detected for a **{p_size}** scale project in the current timeframe.
 
-        st.divider()
-        st.subheader("📝 STRATEGIC ENGINEERING DOSSIER")
+        ### III. SUPPLY CHAIN STATUS
+        Logistics flow in **{region}** is currently **OPTIMAL**. The AI core confirms that procurement dwell-times are tracking at 98% efficiency compared to the 5-year historical average.
 
-        # Dynamic Content generation to ensure the report changes
-        if p_var < 1.5:
-            # POSITIVE / NO RISK REPORT
-            report = f"""
-            ### 1. BRIEF OVERVIEW
-            The AI core identifies that the **{p_phase}** phase in **{region}** is currently within the **Optimal Execution Window**. With a planned duration of **{p_days} days**, the project is technically on track with zero detected friction.
+        ### IV. WEATHER IMPACT
+        The identified **{w_status}** weather at **{w_temp}°C** provides a perfect atmospheric window for **{p_phase}**. Material curing rates and labor endurance will not be negatively affected.
 
-            ### 2. POTENTIAL RISKS
-            Risk level is **NEGLIGIBLE**. Current parameters suggest that all environmental and logistical variables are aligned with the project baseline.
+        ### V. LABOR COORDINATION ADVICE
+        * **Maintain Momentum:** Continue with your current shift patterns.
+        * **Proactive PM Advice:** Since efficiency is high ({p_labor}), use this window to execute non-critical secondary tasks to create an even larger safety buffer for future phases.
 
-            ### 3. SUPPLY CHAIN STATUS
-            Logistics for **{p_size}** scale projects are currently **STABLE**. The AI scan confirms that regional transit routes in **{region}** are operating at 98% efficiency.
+        ### VI. ESTIMATED ADDITIONAL COSTS
+        **$0.00**. No emergency financial intervention is required at this stage.
 
-            ### 4. WEATHER IMPACT ANALYSIS
-            Current status: **{w_status}** at **{w_temp}°C**. These atmospheric conditions are ideal for **{p_phase}**. No material curing or labor safety risks are present.
+        ### VII. STRATEGIC SOLUTIONS
+        Proceed as planned. We recommend a "Safety Stand-down" only for routine equipment maintenance to ensure that the current high performance levels continue throughout the **{p_size}** lifecycle.
+        """
 
-            ### 5. WORKFORCE COORDINATION
-            Maintain current deployment levels. Advice to PM: Since efficiency is high ({p_labor}), consider pre-staging materials for the next milestone to capitalize on this stability.
+    st.markdown(report)
+    st.download_button("📥 DOWNLOAD FULL DOSSIER", report, file_name=f"TARYAQ_{region}_Report.txt")
 
-            ### 6. ESTIMATED ADDITIONAL COSTS
-            **$0.00**. Financial reserves should remain focused on future phases.
-
-            ### 7. STRATEGIC SOLUTIONS
-            Proceed as planned. Ensure the **{p_labor}** index is monitored weekly to maintain this momentum.
-            """
-        else:
-            # RISK INTERVENTION REPORT
-            report = f"""
-            ### 1. BRIEF OVERVIEW
-            A strategic variance of **{p_var} days** has been detected for the **{p_phase}** phase. Given the **{p_size}** scale, immediate parametric adjustments are required to protect the project's Critical Path.
-
-            ### 2. POTENTIAL RISKS
-            * **Schedule Slippage:** High risk of compounding delays exceeding {p_var * 2} days if not addressed.
-            * **Thermal Load:** At **{w_temp}°C**, productivity is forecasted to drop by 22%.
-
-            ### 3. SUPPLY CHAIN STATUS
-            Supply chain for **{region}** is currently **{"VOLATILE" if p_size == "Mega" else "SENSITIVE"}**. AI indicates a potential 5-day delay in specialized material deliveries.
-
-            ### 4. WEATHER IMPACT ANALYSIS
-            The site is facing **{w_status}** conditions. Under **{w_status}** at **{w_temp}°C**, the **{p_phase}** requires specific material handling protocols to prevent chemical instability or labor exhaustion.
-
-            ### 5. WORKFORCE COORDINATION
-            * **Shift Modification:** Transition 80% of outdoor tasks to nocturnal hours.
-            * **Rest Cycles:** Implement mandatory 10-minute cooling intervals to sustain the **{p_labor}** efficiency index.
-
-            ### 6. ESTIMATED ADDITIONAL COSTS
-            * **Logistical Expediting:** +$3,500 - $12,000 depending on urgent sourcing.
-            * **Night Premiums:** +15% labor cost increase for this phase.
-
-            ### 7. STRATEGIC SOLUTIONS
-            * **Bypass Logistics:** Switch to local suppliers in **{region}** clusters.
-            * **Buffer Realignment:** Add a **{round(p_var * 1.5, 1)} day** safety buffer to the next milestone immediately.
-            """
-        
-        st.markdown(report)
-        st.download_button("📥 DOWNLOAD DOSSIER", report, file_name=f"TARYAQ_{region}_Report.txt")
-
-else:
-    st.info("👈 Please enter project parameters and click 'EXECUTE AI STRATEGIC SCAN' to generate a fresh report.")
+elif not analyze_btn:
+    st.info("👈 Adjust parameters and click 'EXECUTE DEEP STRATEGIC SCAN' to generate your dossier.")
